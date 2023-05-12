@@ -1,0 +1,161 @@
+import random
+import os
+my_cards_value = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "10":10, "J":10, "Q":10, "K":10, "A":11}
+   
+
+
+cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+suits = ['♠', '♥', '♦', '♣']
+deck = []
+
+for suit in suits:
+   for rank in cards:
+      deck.append(f'{rank} of {suit}')
+
+
+class Player:
+   def __init__(self, name):
+        self.name = name
+        self.player_score = 0
+        self.hand_player = []
+        self.choose_again = True
+        self.has_an_ace = False
+        self.busted = False
+
+
+
+class Game:
+    def __init__(self, game):
+        self.game = "Blackjack"
+
+    def deal_card(self, player): 
+            card_p1 = random.choice(deck)
+            x = card_p1.split()
+            player.player_score += my_cards_value[x[0]]
+            if x[0] == 'A':
+                player.has_an_ace = True
+            
+            player.hand_player.append(card_p1)
+            deck.remove(card_p1)
+
+    def choice(self, player):
+        choice = input('Do you want another card? Press H for Hit and S for Stand: ')
+        if choice.upper() == 'H':
+            self.deal_card(player)
+            player.choose_again = True
+            print('Your new card is {card} and you have {points} points'.format(card = player.hand_player[-1], points = player.player_score))
+            
+
+
+        elif choice.upper() == 'S':
+            player.choose_again = False
+            print('You chose to stay with {points} points.'.format(points = player.player_score))
+            
+
+
+
+
+
+def play_game():
+    name = input("Welcome to a new round of Blackjack! What is your name?")
+    print("Hi, {name}! Let's start!".format(name = name))
+
+    player = Player(name)
+    dealer = Player("Dealer")
+    blackjack = Game("BlackJack")
+
+    blackjack.deal_card(player)
+    blackjack.deal_card(dealer)
+
+
+    print("Your card is {card_p1}, and the dealer's is {card_dealer}. You have {points1} points and the dealer has {points_dealer} points.".format(card_p1 = player.hand_player[0], card_dealer = dealer.hand_player[0], points1 = player.player_score, points_dealer = dealer.player_score))
+
+    blackjack.deal_card(player)
+    blackjack.deal_card(dealer)
+
+    print("Your second card is {card_p1}, and the dealer's is face down. You have {points1} points.".format(card_p1 = player.hand_player[1], points1 = player.player_score))
+
+    # SCORE FIRST TWO CARDS:
+    if player.player_score == 21:
+        print("Blackjack! You won.")
+        
+
+    if player.player_score == 22:
+        player.player_score -= 10
+        print("One of your Aces is worth 1 point now. You have {points} points.".format(points = player.player_score))
+        
+
+    while player.player_score < 21 and player.choose_again == True:
+            blackjack.choice(player)
+            
+    if player.player_score > 21:
+        if player.has_an_ace == True:
+            player.player_score -= 10
+            print("One of your Aces is worth 1 point now. You have {points} points.".format(points = player.player_score))
+            while player.player_score < 21 and player.choose_again == True:
+            
+                print(player.player_score)
+                print(player.has_an_ace)
+
+                blackjack.choice(player)
+
+        else:
+            player.busted = True
+            print("You busted! The dealer wins.")
+       
+
+    if player.player_score == 21:
+        print("You have 21 points.")
+    
+
+
+
+    if player.choose_again == False and player.busted == False:
+        print("Now is the Dealer's turn.")
+        print("The Dealer has revealed his face down card and it is a {second_card_dealer}! That means he has {dealer_points} points.".format(second_card_dealer = dealer.hand_player[1], dealer_points = dealer.player_score))
+        
+        if dealer.player_score == 21:
+            print("The Dealer has 21 Points")
+
+        if dealer.player_score == 22:
+            dealer.player_score -= 10
+            print("The dealer busted, but he has an Ace, meaning that one of the Dealer's Aces is worth 1 point now. He has have {points} points.".format(points = dealer.player_score))
+
+
+
+        while dealer.player_score <= 16:
+        
+            blackjack.deal_card(dealer)
+           
+            print("The dealer took another card! Now he added {third_card} to his hand, with a total of {points} points.".format(third_card = dealer.hand_player[-1], points = dealer.player_score))
+            if dealer.player_score > 21 and dealer.has_an_ace == True:
+                dealer.has_an_ace = False
+                dealer.player_score -= 10
+                print("The Dealer's Ace is worth 1 point now.")
+            
+            
+
+
+
+        if dealer.player_score > 16 and dealer.player_score < 21:
+            print("The Dealer's Score is {points}, that means he stays.".format(points = dealer.player_score))
+
+
+        if dealer.player_score > 21:
+            dealer.busted = True
+            print('The Dealer busted!')
+
+
+        if dealer.player_score > player.player_score and dealer.busted == False or player.busted == True and dealer.busted == False and dealer.player_score != 21:
+            print("The dealer won the game.")
+
+        if player.player_score > dealer.player_score and player.busted == False:
+            print("You won that game!")
+
+        if player.player_score == dealer.player_score and player.busted == False and dealer.busted == False:
+            print("The dealer wins.")
+
+        if player.busted == False and dealer.busted == True:
+            print("Congrats! You won!")
+
+play_game()
